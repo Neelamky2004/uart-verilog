@@ -1,6 +1,6 @@
 # UART Transmitter and Receiver in Verilog
 
-A UART (8N1) transmitter and receiver written in Verilog as finite state machines, tested with a loopback testbench and run through a Tcl simulation script.
+A UART (8N1) transmitter and receiver written in Verilog as finite state machines, tested with a loopback testbench, synthesized with Yosys, and run through Tcl and Perl scripts.
 
 Default setting: 50 MHz clock, 115200 baud (434 clocks per bit). Both are parameters in `uart_top`.
 
@@ -34,16 +34,42 @@ Errors          : 0
 RESULT          : PASS
 ```
 
+## Synthesis (Yosys)
+
+`synth/synth.ys` synthesizes the design into logic gates and flip-flops and writes a gate-level netlist. The same loopback testbench is then run on the netlist (gate-level simulation) and passes with 0 errors.
+
+```
+Number of cells: 354
+  Flip-flops: 77
+  Logic gates: 277
+```
+
 ## Run
 
 ```
-sh run.sh
+sh run.sh                  # RTL simulation (Tcl script)
+sh run_synth.sh            # Yosys synthesis + gate-level simulation
+perl scripts/summary.pl    # summary of simulation and synthesis results
 gtkwave build/uart.vcd
 ```
 
 `scripts/run_sim.tcl` compiles all RTL and testbench files with Icarus Verilog, runs the simulation, saves `build/sim.log` and exits with a pass/fail code.
 
-Needs Icarus Verilog and `tclsh`. GTKWave is optional.
+`scripts/summary.pl` reads `build/sim.log` and `build/synth_stat.txt` and prints bytes sent/received, errors, result and the flip-flop / gate count.
+
+```
+==== UART run summary ====
+Bytes sent:      56
+Bytes received:  56
+Framing errors:  1
+Errors:          0
+RESULT:          PASS
+Total cells:     354
+Flip-flops:      77
+Logic gates:     277
+```
+
+Needs Icarus Verilog, Yosys, `tclsh` and Perl. GTKWave is optional.
 
 ## Structure
 
@@ -52,6 +78,9 @@ rtl/uart_tx.v              transmitter FSM
 rtl/uart_rx.v              receiver FSM
 rtl/uart_top.v             top module
 tb/tb_uart_loopback.v      loopback testbench
+synth/synth.ys             Yosys synthesis script
 scripts/run_sim.tcl        Tcl build + run script
-run.sh                     wrapper
+scripts/summary.pl         Perl result summary
+run.sh                     RTL simulation
+run_synth.sh               synthesis + gate-level simulation
 ```
