@@ -29,7 +29,11 @@ module tb_uart_loopback;
 
     always #10 clk = ~clk;
 
+`ifdef GLS
+    uart_top dut (
+`else
     uart_top #(.CLK_FREQ(CLK_FREQ), .BAUD(BAUD)) dut (
+`endif
         .clk(clk), .rst(rst),
         .tx_start(tx_start), .tx_data(tx_data),
         .rx(rx_line),
