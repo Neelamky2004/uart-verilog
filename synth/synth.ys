@@ -1,0 +1,6 @@
+read_verilog rtl/uart_tx.v rtl/uart_rx.v rtl/uart_top.v
+synth -top uart_top -flatten
+abc -g AND,NAND,OR,NOR,XOR,XNOR,MUX
+opt_clean
+tee -o build/synth_stat.txt stat
+write_verilog -noattr build/uart_netlist.v
